@@ -3,30 +3,66 @@
 @tailwind utilities;
 
 :root {
-    --background: #ffffff;
-    --foreground: #171717;
     --fulvous: #d98324ff;
     --turkey-red: #a40606ff;
     --aureolin: #f8f32bff;
     --yinmn-blue: #3a5683ff;
     --licorice: #140009ff;
+    --darker: rgb(15, 44, 90);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
+        --yinmn-blue: rgb(36, 58, 93);
     }
 }
 
-body {
-    color: var(--foreground);
-    background: var(--background);
-    font-family: Arial, Helvetica, sans-serif;
+html {
+    background-color: var(--yinmn-blue);
+    font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+        "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    color: white;
 }
 
-@layer utilities {
-    .text-balance {
-        text-wrap: balance;
-    }
+nav div {
+    /* All navdiv elements */
+    padding-top: 0.8mm;
+    padding-bottom: 0.8mm;
+}
+
+nav.outer div.name {
+    /* First navdiuv element */
+    flex-grow: 0.5;
+}
+
+nav.outer {
+    /* Outer main navigation */
+    background-color: var(--darker);
+    width: 100%;
+    max-height: 8%;
+    top: 0%;
+    position: sticky;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+nav.inner {
+    /* Inner navigation, with the actyual buttons */
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    gap: 5%;
+    flex-grow: 0.4;
+}
+
+main {
+    margin: 2%;
+}
+
+div#amt {
+    position: absolute;
+    right: 2%;
+    top: 40%;
 }
