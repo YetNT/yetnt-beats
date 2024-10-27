@@ -29,6 +29,8 @@ export class GoogleDrive {
                 "https://www.googleapis.com/auth/drive.readonly", // Read-only access
                 "https://www.googleapis.com/auth/drive.metadata.readonly", // Read-only access to file metadata
                 "https://www.googleapis.com/auth/drive.appdata", // Access to application data
+                "https://www.googleapis.com/auth/drive.meet.readonly",
+                "https://www.googleapis.com/auth/drive.photos.readonly",
             ],
         });
 
@@ -38,18 +40,16 @@ export class GoogleDrive {
         this.drive = google.drive({ version: "v3", auth: this.authClient });
     }
 
-    async listFiles(request: NextRequest): Promise<NextResponse> {
+    async listFiles(
+        request: NextRequest,
+        pageSize: number
+    ): Promise<NextResponse> {
         google.options({ auth: this.authClient });
-
-        const pageSize =
-            Number(request.nextUrl.searchParams.get("pageSize")) || 10;
 
         const res = await this.drive.files.list({
             pageSize,
-            fields: "files(id, name)",
+            // fields: "files(id, name)",
         });
-
-        console.log("Files:", res.data.files);
         return NextResponse.json(res.data.files); // Return the list of files as JSON
     }
 

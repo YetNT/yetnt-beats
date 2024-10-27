@@ -32,3 +32,14 @@ export function validateToken(
         return NextResponse.json({ error: "Invalid token" }, { status: 401 }); // Return null if the token is invalid
     }
 }
+
+/**
+ * Unsafe authorization header check.
+ * @param req
+ * @returns
+ */
+export function simpleValidateToken(req: NextRequest) {
+    return req.headers.get("Authorization") == process.env.NEXT_PUBLIC_PSWD2
+        ? true
+        : NextResponse.json({ error: "Unauthorizaed" }, { status: 401 });
+}
