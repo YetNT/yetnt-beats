@@ -45,6 +45,7 @@ nav.outer {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    align-items: center;
 }
 
 nav.inner {
