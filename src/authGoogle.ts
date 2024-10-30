@@ -75,26 +75,44 @@ export class GoogleDrive {
             );
         }
     }
+
+    async getFileBuffer(
+        fileId: string
+    ): Promise<{ buffer: Buffer; name: string }> {
+        google.options({ auth: this.authClient });
+
+        const metadataRes = await this.drive.files.get({
+            fileId,
+            fields: "name",
+            supportsAllDrives: true,
+        });
+
+        const name = metadataRes.data.name || "";
+
+        return new Promise((resolve, reject) => {
+            this.drive.files.get(
+                { fileId, alt: "media", supportsAllDrives: true },
+                { responseType: "stream" },
+                (err, res) => {
+                    if (err) {
+                        return reject("The API returned an error: " + err);
+                    }
+
+                    if (!res) {
+                        return reject("No response received from API");
+                    }
+
+                    const data = res.data as unknown as NodeJS.ReadableStream;
+                    const buf: Buffer[] = [];
+                    data.on("data", (chunk) => {
+                        buf.push(chunk);
+                    });
+                    data.on("end", () => {
+                        const buffer = Buffer.concat(buf);
+                        resolve({ buffer, name });
+                    });
+                }
+            );
+        });
+    }
 }
-
-// Example usage
-// (async () => {
-//     const googleDrive = new GoogleDrive();
-
-//     // List files
-//     const files = await googleDrive.listFiles();
-
-//     if (files.length > 0) {
-//         const fileId = files[0].id; // Get the ID of the first file
-//         try {
-//             const downloadLink = await googleDrive.getTemporaryDownloadLink(
-//                 fileId
-//             );
-//             console.log("Temporary Download Link:", downloadLink);
-
-//             // Here, you would typically send this link to the client for download.
-//         } catch (error) {
-//             console.error("Error generating download link:", error);
-//         }
-//     }
-// })().catch(console.error);
