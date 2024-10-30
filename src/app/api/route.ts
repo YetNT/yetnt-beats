@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GoogleDrive } from "@/authGoogle";
 import { validateToken } from "@/validateToken";
 import { _writeBufferToFile, createZipFile } from "@/zip";
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
     const zipBuffer = await createZipFile(BUFFERS_NAMES[0], BUFFERS_NAMES[1]);
 
     // TO DO - UPLOAD ZIP TO GOOGLE DRIVE
+    // TO DO - REMOVE LINE 1 FOR SAFE ESLINT
 
     // await _writeBufferToFile(zipBuffer, "plswork.zip");
 
