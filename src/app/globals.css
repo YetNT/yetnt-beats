@@ -17,6 +17,11 @@
     }
 }
 
+input,
+textarea,
+select {
+    color: grey;
+}
 html {
     background-color: var(--yinmn-blue);
     font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
