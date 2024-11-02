@@ -7,9 +7,10 @@ import { LICENSES_MAP, TAGS_ARRAY } from '@/beatstypes';
 const Admin = () => {
     const [password, setPassword] = useState('');
     const [authenticated, setAuthenticated] = useState(false);
-    const [unatggedWav, setUnatggedWav] = useState<File | null>(null);
+    const [untaggedWav, setUntaggedWav] = useState<File | null>(null);
     const [taggedWav, setTaggedWav] = useState<File | null>(null);
     const [taggedMp3, setTaggedMp3] = useState<File | null>(null);
+    const [image, setImage] = useState<File | null>(null);
     const [name, setName] = useState('');
     const [bpm, setBpm] = useState('');
     const [price, setPrice] = useState('');
@@ -36,12 +37,13 @@ const Admin = () => {
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!unatggedWav || !taggedWav || !taggedMp3) return alert('Please upload all required files');
+        if (!untaggedWav || !taggedWav || !taggedMp3 || !image) return alert('Please upload all required files');
 
         const formData = new FormData();
-        formData.append('unatggedWav', unatggedWav);
+        formData.append('untaggedWav', untaggedWav);
         formData.append('taggedWav', taggedWav);
-        formData.append('waggedMp3', taggedMp3);
+        formData.append('taggedMp3', taggedMp3);
+        formData.append('image', image);
         formData.append('name', name);
         formData.append('bpm', bpm);
         formData.append('price', price);
@@ -84,11 +86,19 @@ const Admin = () => {
             ) : (
                 <form onSubmit={handleFormSubmit}>
                     <div>
-                        <label>UNATGGED .wav</label>
+                        <label>IMAGE</label>
+                        <input
+                            type="file"
+                            accept="image/png"
+                            onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)}
+                        />
+                    </div>
+                    <div>
+                        <label>UNTAGGED .wav</label>
                         <input
                             type="file"
                             accept="audio/wav"
-                            onChange={(e) => setUnatggedWav(e.target.files ? e.target.files[0] : null)}
+                            onChange={(e) => setUntaggedWav(e.target.files ? e.target.files[0] : null)}
                         />
                     </div>
                     <div>

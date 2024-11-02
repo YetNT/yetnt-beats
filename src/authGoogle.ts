@@ -1,10 +1,15 @@
 import { google, drive_v3 } from "googleapis";
+import stream from "stream";
 import { NextRequest, NextResponse } from "next/server"; // Importing NextRequest and NextResponse
 
 export class GoogleDrive {
     private drive: drive_v3.Drive;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private authClient: any | undefined;
+
+    private credentials:
+        | { client_email: string | undefined; private_key: string | undefined }
+        | undefined; // Holds the decoded JSON key for authentication
 
     constructor() {
         // Initialize the drive but don't set it yet
@@ -33,6 +38,8 @@ export class GoogleDrive {
                 "https://www.googleapis.com/auth/drive.photos.readonly",
             ],
         });
+
+        this.credentials = JSON.parse(credentials);
 
         // Get the authenticated client
         this.authClient = await auth.getClient();
@@ -114,5 +121,73 @@ export class GoogleDrive {
                 }
             );
         });
+    }
+
+    async _JWTClient() {
+        // Configure JWT auth client
+        const jwtClient = new google.auth.JWT(
+            this.credentials?.client_email,
+            undefined,
+            this.credentials?.private_key,
+            ["https://www.googleapis.com/auth/drive"]
+        );
+
+        // Authenticate request
+        jwtClient.authorize(function (err) {
+            if (err) {
+                return;
+            } else {
+                console.log("Google autorization complete");
+            }
+        });
+
+        return jwtClient;
+    }
+
+    /**
+     * Creates (uploads) a new file or folder in Google Drive.
+     *
+     * @param parentFolderId - The ID of the parent folder where the new file or folder will be created.
+     * @param name - The name of the new file or folder.
+     * @param mimeTypeOrIsFolder - The MIME type of the new file or `true` if it's a folder.
+     * @param buffer - Optional. The content of the file to be created. If not provided, a folder will be created.
+     *
+     * @returns The ID of the newly created file or folder.
+     *
+     * @throws Will throw an error if there's an issue creating the file or folder.
+     */
+    async createFileOrFolder(
+        parentFolderId: string,
+        name: string,
+        mimeTypeOrIsFolder: string | boolean,
+        buffer?: Buffer
+    ) {
+        google.options({ auth: this.authClient });
+
+        const fileMetadata = {
+            name: name,
+            mimeType:
+                mimeTypeOrIsFolder === true
+                    ? "application/vnd.google-apps.folder"
+                    : (mimeTypeOrIsFolder as string),
+            parents: [parentFolderId],
+        };
+
+        const media = buffer
+            ? { body: new stream.PassThrough().end(buffer) }
+            : undefined;
+
+        try {
+            const response = await this.drive.files.create({
+                auth: await this._JWTClient(),
+                requestBody: fileMetadata,
+                media,
+                fields: "id",
+            });
+            return response.data.id;
+        } catch (error) {
+            console.error("Error creating the file/folder:", error);
+            throw error;
+        }
     }
 }

@@ -6,7 +6,8 @@ export interface IncomingBeatData {
     licenses: string | null;
     coAuthors: string | null;
     tags: string | null;
-    unatggedWav: File | null;
+    untaggedWav: File | null;
+    image: File | null;
     taggedWav: File | null;
     taggedMp3: File | null;
     price: string | null;
@@ -14,13 +15,14 @@ export interface IncomingBeatData {
 
 export interface BeatData {
     name: string;
-    bpm: string;
+    bpm: number;
     key?: string;
     description: string;
+    image: File;
     licenses: Licenses[];
     coAuthors?: string[];
     tags: Tags[];
-    unatggedWav: File;
+    untaggedWav: File;
     taggedWav: File;
     taggedMp3: File;
     price?: number;
@@ -72,17 +74,37 @@ export function convertIncomingBeatData(incoming: IncomingBeatData): BeatData {
 
     const beatData: BeatData = {
         name: incoming.name || "",
-        bpm: incoming.bpm || "",
+        bpm: incoming.bpm ? parseFloat(incoming.bpm) : 0,
         key: incoming.key || "",
         description: incoming.description || "",
         licenses,
         coAuthors,
         tags,
-        unatggedWav: incoming.unatggedWav!,
+        untaggedWav: incoming.untaggedWav!,
+        image: incoming.image!,
         taggedWav: incoming.taggedWav!,
         taggedMp3: incoming.taggedMp3!,
         price: incoming.price ? parseFloat(incoming.price) : undefined,
     };
 
+    if (
+        beatData.coAuthors?.length !== 0 &&
+        !beatData.licenses?.includes(Licenses.MULTI_PROD_RIGHTS)
+    )
+        beatData.licenses.push(Licenses.MULTI_PROD_RIGHTS); // If co authors exist and multi prod rights aren't enabled, enable it
+
+    if (
+        beatData.price === undefined &&
+        !beatData.licenses?.includes(Licenses.FREE_TAGGED)
+    )
+        beatData.licenses.push(Licenses.FREE_TAGGED); // if there's no price and free licence isn't there, push it.
+
     return beatData;
+}
+
+export enum File3MimeType {
+    WAV = "audio/wav",
+    MP3 = "audio/mp3",
+    JSON = "application/json",
+    PNG = "image/png",
 }
