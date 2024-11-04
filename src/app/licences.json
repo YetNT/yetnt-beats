@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Free Tagged",
+        "id": 0,
+        "description": "This beat is free to use, but it's only available as an MP3 file. The track will have a tag and you must credit me."
+    },
+    {
+        "name": "Common Rights",
+        "id": 1,
+        "description": "You can upload this beat anywhere for *PRICE*, but it will still have a tag. If your streaming hits a certain threshold, you'll need to compensate me."
+    },
+    {
+        "name": "Exclusive Rights",
+        "id": 2,
+        "description": "Upload this beat anywhere for *PRICE* without my tag. Credits in the song metadata are still appreciated."
+    },
+    {
+        "name": "Multi-Prod Rights",
+        "id": 3,
+        "description": "License for when the beat was made by multiple people. Allows multiple producers to share rights."
+    },
+    {
+        "name": "Agreement Rights",
+        "id": 4,
+        "description": "You can negotiate the price."
+    }
+]
