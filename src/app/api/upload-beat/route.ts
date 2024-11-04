@@ -1,5 +1,6 @@
 import { GoogleDrive } from "@/authGoogle";
 import {
+    BeatJSON,
     convertIncomingBeatData,
     File3MimeType,
     IncomingBeatData,
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest) {
         name: formData.get("name") as string | null,
         bpm: formData.get("bpm") as string | null,
         key: formData.get("key") as string | null,
+        displayName: formData.get("displayName") as string | null,
         description: formData.get("description") as string | null,
         licenses: formData.get("licenses") as string | null,
         coAuthors: formData.get("coAuthors") as string | null,
@@ -47,7 +49,7 @@ async function uploadBeat(beatData: IncomingBeatData) {
     );
     const g = new GoogleDrive();
     g.initialize();
-    const beatsFolderid = "10SEHzjOMjHIErmlSLBAlYx7S4NxgdkAy";
+    const beatsFolderid = "1VCVH2mMqEI0XY7iBayyfkDVJ8JuqqwLo";
     const beatFolder = await g.createFileOrFolder(beatsFolderid, beatId, true); // currently make beat folder for the beat
 
     await g.createFileOrFolder(
@@ -87,15 +89,17 @@ async function uploadBeat(beatData: IncomingBeatData) {
         })
     );
 
-    const beatMetadata = {
+    const beatMetadata: BeatJSON = {
         name: beat.name,
+        id: beatId,
+        displayName: beat.displayName,
         description: beat.description,
         bpm: beat.bpm,
-        key: beat.key,
+        key: beat.key || "undefined",
         tags: beat.tags,
         licenses: beat.licenses,
-        coAuthors: beat.coAuthors,
-        price: beat.price,
+        coAuthors: beat.coAuthors || [],
+        price: beat.price || 0,
     };
 
     await g.createFileOrFolder(

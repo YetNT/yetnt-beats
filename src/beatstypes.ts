@@ -1,5 +1,6 @@
 export interface IncomingBeatData {
     name: string | null;
+    displayName: string | null;
     bpm: string | null;
     key: string | null;
     description: string | null;
@@ -17,6 +18,7 @@ export interface BeatData {
     name: string;
     bpm: number;
     key?: string;
+    displayName: string;
     description: string;
     image: File;
     licenses: Licenses[];
@@ -27,6 +29,19 @@ export interface BeatData {
     taggedMp3: File;
     price?: number;
 }
+
+export type BeatJSON = {
+    name: string;
+    id: string;
+    displayName: string;
+    description: string;
+    bpm: number;
+    key: string;
+    tags: Tags[];
+    licenses: Licenses[];
+    coAuthors: string[];
+    price: number;
+};
 
 export enum Tags {
     DETROIT = "detroit",
@@ -40,6 +55,20 @@ export enum Tags {
     SAMPLE = "sample",
     BEAT = "beat",
     FREE = "free",
+    RIO = "rio da yung og",
+    RMC = "rmc mike",
+    FXCE = "babyfxce e",
+    KIDD = "krispyliffe kidd",
+    GHARD = "grindhard e",
+    BFB = "bfb da packman",
+    ENRGY = "erngy",
+    TB = "type beat",
+    BLX = "blxckie",
+    BRA = "k1llbrady",
+    NTM = "newtankmerc",
+    KUPA = "brotherkupa",
+    JAY = "jaykatana",
+    UNDR = "sa underground",
 }
 export const TAGS_ARRAY = Object.values(Tags);
 
@@ -80,6 +109,7 @@ export function convertIncomingBeatData(incoming: IncomingBeatData): BeatData {
         licenses,
         coAuthors,
         tags,
+        displayName: incoming.displayName || "null",
         untaggedWav: incoming.untaggedWav!,
         image: incoming.image!,
         taggedWav: incoming.taggedWav!,
@@ -107,4 +137,14 @@ export enum File3MimeType {
     MP3 = "audio/mp3",
     JSON = "application/json",
     PNG = "image/png",
+    FOLDER = "application/vnd.google-apps.folder",
 }
+
+export type SortedBeats = {
+    id: string;
+    files: {
+        mimeType: File3MimeType;
+        id: string;
+        name: string;
+    }[];
+}[];
