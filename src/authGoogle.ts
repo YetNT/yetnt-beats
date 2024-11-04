@@ -1,6 +1,7 @@
 import { google, drive_v3 } from "googleapis";
 import stream from "stream";
-import { NextRequest, NextResponse } from "next/server"; // Importing NextRequest and NextResponse
+import { NextResponse } from "next/server"; // Importing NextRequest and NextResponse
+import { SortedBeats } from "./beatstypes";
 
 export class GoogleDrive {
     private drive: drive_v3.Drive;
@@ -47,17 +48,79 @@ export class GoogleDrive {
         this.drive = google.drive({ version: "v3", auth: this.authClient });
     }
 
-    async listFiles(
-        request: NextRequest,
-        pageSize: number
-    ): Promise<NextResponse> {
+    async listFiles(pageSize?: number, beatId?: string) {
         google.options({ auth: this.authClient });
 
-        const res = await this.drive.files.list({
-            pageSize,
-            // fields: "files(id, name)",
-        });
-        return NextResponse.json(res.data.files); // Return the list of files as JSON
+        const res = await this.drive.files.list(
+            pageSize
+                ? {
+                      q: "trashed=false",
+                      pageSize,
+                      // fields: "files(id, name)",
+                  }
+                : {
+                      q: "trashed=false",
+                  }
+        );
+        return !beatId
+            ? res.data.files
+            : res.data.files?.filter((file) => file.name?.includes(beatId));
+    }
+
+    /**
+     * Retrieves a list of files from Google Drive, filters them to only include JSON files,
+     * extracts the beat IDs from the file names, and then sorts the beats based on their IDs.
+     *
+     * @remarks
+     * This function assumes that the `listFiles` method has already been implemented and returns
+     * an array of `drive_v3.Schema$File` objects.
+     *
+     * @returns An array of objects, where each object represents a beat and contains its ID and
+     * associated files from Google Drive.
+     *
+     * @throws Will throw an error if there's an issue retrieving files from Google Drive.
+     */
+    async listAndSortBeats() {
+        const files = (await this.listFiles()) || [];
+        const JSONfiles = files.filter((file) => file.name?.endsWith(".json"));
+
+        const beatIds = [
+            ...new Set(JSONfiles.map((file) => file.name?.slice(0, -5) || "")),
+        ];
+
+        const sortedBeats = beatIds.map((id) => {
+            return { id, files: files.filter((f) => f.name?.includes(id)) };
+        }) as SortedBeats;
+
+        return sortedBeats;
+    }
+
+    /**
+     * Fuck it we ball
+     *
+     * Deletes all files from the Google Drive.
+     *
+     * This function retrieves a list of all files from Google Drive using the `listFiles` method,
+     * then iterates through each file and deletes it using the Google Drive API.
+     *
+     * @remarks
+     * This function assumes that the `listFiles` method has already been implemented and returns
+     * an array of `drive_v3.Schema$File` objects.
+     *
+     * @throws Will throw an error if there's an issue retrieving files from Google Drive or deleting them.
+     */
+    async deleteAllFiles() {
+        google.options({ auth: this.authClient });
+        try {
+            const files = (await this.listFiles()) || [];
+            for (const file of files) {
+                await this.drive.files.delete({ fileId: file.id || "" });
+                console.log(`Deleted file ${file.id}`);
+            }
+            console.log("All files deleted successfully");
+        } catch (error) {
+            console.error("Error deleting files:", error);
+        }
     }
 
     async getTemporaryDownloadLink(
@@ -84,8 +147,13 @@ export class GoogleDrive {
     }
 
     async getFileBuffer(
-        fileId: string
-    ): Promise<{ buffer: Buffer; name: string }> {
+        fileId: string,
+        stream: boolean = false
+    ): Promise<{
+        buffer?: Buffer;
+        stream?: NodeJS.ReadableStream;
+        name: string;
+    }> {
         google.options({ auth: this.authClient });
 
         const metadataRes = await this.drive.files.get({
@@ -110,14 +178,21 @@ export class GoogleDrive {
                     }
 
                     const data = res.data as unknown as NodeJS.ReadableStream;
-                    const buf: Buffer[] = [];
-                    data.on("data", (chunk) => {
-                        buf.push(chunk);
-                    });
-                    data.on("end", () => {
-                        const buffer = Buffer.concat(buf);
-                        resolve({ buffer, name });
-                    });
+
+                    // If `stream` parameter is true, return the stream directly
+                    if (stream) {
+                        resolve({ stream: data, name });
+                    } else {
+                        // Otherwise, accumulate chunks into a buffer
+                        const buf: Buffer[] = [];
+                        data.on("data", (chunk) => {
+                            buf.push(chunk);
+                        });
+                        data.on("end", () => {
+                            const buffer = Buffer.concat(buf);
+                            resolve({ buffer, name });
+                        });
+                    }
                 }
             );
         });
@@ -136,8 +211,6 @@ export class GoogleDrive {
         jwtClient.authorize(function (err) {
             if (err) {
                 return;
-            } else {
-                console.log("Google autorization complete");
             }
         });
 
@@ -184,6 +257,7 @@ export class GoogleDrive {
                 media,
                 fields: "id",
             });
+
             return response.data.id;
         } catch (error) {
             console.error("Error creating the file/folder:", error);
