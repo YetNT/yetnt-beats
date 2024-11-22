@@ -137,8 +137,11 @@ export enum File3MimeType {
     MP3 = "audio/mp3",
     JSON = "application/json",
     PNG = "image/png",
+    JPEG = "image/jpeg",
     FOLDER = "application/vnd.google-apps.folder",
 }
+
+export type File3Images = "image/png" | "image/jpeg";
 
 export type SortedBeats = {
     id: string;
