@@ -1,5 +1,6 @@
 import { GetBeatResponse } from '@/app/api/beat/route';
 import Image from 'next/image';
+import "./page.css";
 // import { BeatJSON, File3MimeType } from '@/beatstypes';
 
 // function bufferToBeatJSON(buffer: Buffer): BeatJSON {
@@ -21,21 +22,21 @@ interface BeatImageProps {
 
 async function cantFindBeat() {
     return (
-        <h1>Yoh can&apos;t find the beat, hades boi.</h1>
+        <h1>I loweky can&apos;t find that beat dawg.</h1>
     );
 }
 
-export function BeatImage({ base64, mimeType }: BeatImageProps) {
-  const dataUrl = `data:${mimeType};base64,${base64}`;
+function BeatImage({ base64, mimeType }: BeatImageProps) {
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
-  return (
-    <Image
-        src={dataUrl}
-        alt="Beat image"
-        width={500} // Replace with your desired width
-        height={300} // Replace with your desired height
-    />
-  );
+    return (
+        <Image
+            src={dataUrl}
+            alt="Beat image"
+            width={200}
+            height={200}
+        />
+    );
 }
 
 // Fetches data dynamically on each request
@@ -66,16 +67,19 @@ export default async function BeatPage({ params }: BeatPageProps) {
         }
 
         return (
-            <div>
-                <h1>{beat?.displayName}</h1>
-                <p>Price: ${beat?.price}</p>
-                <BeatImage base64={image?.str || ""} mimeType={image?.mimeType || "image/png"} />
-                {/* Render other beat details */}
+            <div id="beat">
+                <div id="beatTop">
+                    <BeatImage base64={image?.str || ""} mimeType={image?.mimeType || "image/png"} />
+                    <div>
+                        <h1>{beat?.displayName}</h1>
+                        <h2>Price: {beat?.price !== undefined ? beat?.price : "FREE"}</h2>
+                    </div>
+                </div>
             </div>
         );
     } catch (error) {
         console.error("Failed to fetch the beat data:", error);
         console.error(error)
-            cantFindBeat();
+        return cantFindBeat();
     }
 }

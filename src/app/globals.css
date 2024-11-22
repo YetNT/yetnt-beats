@@ -9,11 +9,19 @@
     --yinmn-blue: #3a5683ff;
     --licorice: #140009ff;
     --darker: rgb(15, 44, 90);
+
+    --bg-col-dark: #160f29ff;
+    --bg-col: rgb(42, 31, 72);
+    --dark-cyan: #368f8bff;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
     :root {
         --yinmn-blue: rgb(36, 58, 93);
+
+        --bg-col-dark: #31225bff;
+        --bg-col: #32909dff;
+        --dark-cyan: #44b2adff;
     }
 }
 
@@ -23,7 +31,7 @@ select {
     color: grey;
 }
 html {
-    background-color: var(--yinmn-blue);
+    background-color: var(--bg-col);
     font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
         "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
     color: white;
@@ -31,8 +39,8 @@ html {
 
 nav div {
     /* All navdiv elements */
-    padding-top: 0.8mm;
-    padding-bottom: 0.8mm;
+    padding-top: 1em;
+    padding-bottom: 1em;
 }
 
 nav.outer div.name {
@@ -42,7 +50,7 @@ nav.outer div.name {
 
 nav.outer {
     /* Outer main navigation */
-    background-color: var(--darker);
+    background-color: var(--bg-col-dark);
     width: 100%;
     max-height: 8%;
     top: 0%;
