@@ -12,6 +12,7 @@ const Admin = () => {
     const [taggedMp3, setTaggedMp3] = useState<File | null>(null);
     const [image, setImage] = useState<File | null>(null);
     const [name, setName] = useState('');
+    const [displayName, setDisplayName] = useState('');
     const [bpm, setBpm] = useState('');
     const [price, setPrice] = useState('');
     const [key, setKey] = useState('');
@@ -41,6 +42,7 @@ const Admin = () => {
 
         const formData = new FormData();
         formData.append('untaggedWav', untaggedWav);
+        formData.append('displayName', displayName);
         formData.append('taggedWav', taggedWav);
         formData.append('taggedMp3', taggedMp3);
         formData.append('image', image);
@@ -118,11 +120,20 @@ const Admin = () => {
                         />
                     </div>
                     <div>
-                        <label>Name</label>
+                        <label>Name (simple)</label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Display Name</label>
+                        <input
+                            type="text"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
                             required
                         />
                     </div>
